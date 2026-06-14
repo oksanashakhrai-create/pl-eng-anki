@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polski Flashcards</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--card2:#16213e;--accent:#e94560;--accent2:#0f3460;--green:#00b894;--orange:#fdcb6e;--red:#e17055;--text:#eee;--text2:#aaa;--shadow:0 8px 32px rgba(0,0,0,.4)}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{max-width:600px;margin:0 auto;padding:16px;min-height:100vh;display:flex;flex-direction:column}
+.header{text-align:center;padding:20px 0 10px}
+.header h1{font-size:1.6em;background:linear-gradient(135deg,#e94560,#0f3460);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.header .sub{color:var(--text2);font-size:.85em}
+.stats-bar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.stat{flex:1;min-width:80px;background:var(--card);border-radius:12px;padding:10px;text-align:center}
+.stat .num{font-size:1.4em;font-weight:700}
+.stat .label{font-size:.7em;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.stat.green .num{color:var(--green)}
+.stat.orange .num{color:var(--orange)}
+.stat.red .num{color:var(--red)}
+.modes{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.mode-btn{flex:1;min-width:100px;padding:10px 8px;border:none;border-radius:10px;background:var(--card);color:var(--text);cursor:pointer;font-size:.8em;transition:.2s;border:2px solid transparent}
+.mode-btn:hover{border-color:var(--accent)}
+.mode-btn.active{background:var(--accent);border-color:var(--accent)}
+.mode-btn .icon{font-size:1.3em;display:block;margin-bottom:4px}
+.directions{display:flex;gap:6px;margin:8px 0 16px;justify-content:center}
+.dir-btn{padding:6px 14px;border:2px solid var(--card2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;font-size:.75em;transition:.2s}
+.dir-btn:hover{border-color:var(--accent)}
+.dir-btn.active{border-color:var(--accent);color:var(--text);background:rgba(233,69,96,.15)}
+.card-container{flex:1;display:flex;align-items:center;justify-content:center;perspective:1000px;min-height:320px;margin:8px 0}
+.flashcard{width:100%;max-width:500px;min-height:300px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+.card-front{background:linear-gradient(145deg,#1a1a2e,#16213e);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.05)}
+.card-back{background:linear-gradient(145deg,#16213e,#1a1a2e);box-shadow:var(--shadow);transform:rotateY(180deg);border:1px solid rgba(255,255,255,.05)}
+.card-category{position:absolute;top:14px;left:18px;font-size:.65em;color:var(--accent);text-transform:uppercase;letter-spacing:1px;opacity:.7}
+.card-counter{position:absolute;top:14px;right:18px;font-size:.7em;color:var(--text2)}
+.card-word{font-size:1.6em;font-weight:600;line-height:1.4;margin-bottom:12px}
+.card-hint{font-size:.8em;color:var(--text2);margin-top:8px;font-style:italic}
+.card-example{font-size:.85em;color:var(--text2);margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);line-height:1.5;max-width:100%}
+.card-example strong{color:var(--text);font-weight:500}
+.tap-hint{position:absolute;bottom:16px;font-size:.7em;color:var(--text2);opacity:.5}
+.bottom-bar{display:flex;gap:10px;margin:16px 0 8px;justify-content:center;align-items:center;flex-wrap:wrap}
+.ans-btn{padding:10px 20px;border:none;border-radius:12px;font-size:.82em;font-weight:600;cursor:pointer;transition:.2s;min-width:90px}
+.ans-btn:active{transform:scale(.95)}
+.ans-btn.again{background:var(--red);color:#fff}
+.ans-btn.hard{background:var(--orange);color:#333}
+.ans-btn.good{background:var(--green);color:#fff}
+.next-arrow{width:52px;height:52px;border-radius:50%;border:2px solid var(--card2);background:var(--card);color:var(--text);font-size:1.4em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.next-arrow:hover{border-color:var(--accent);background:rgba(233,69,96,.12);transform:scale(1.08)}
+.next-arrow:active{transform:scale(.95)}
+.progress-wrap{margin:8px 0;height:6px;background:var(--card);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px;transition:width .3s}
+.quiz-options{display:flex;flex-direction:column;gap:10px;width:100%;max-width:500px;margin:16px auto}
+.quiz-opt{padding:14px 20px;border:2px solid var(--card2);border-radius:14px;background:var(--card);color:var(--text);cursor:pointer;font-size:.95em;text-align:left;transition:.2s}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(233,69,96,.08)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(0,184,148,.15);color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(225,112,85,.15);color:var(--red)}
+.browse-list{flex:1;overflow-y:auto}
+.browse-item{padding:14px 16px;background:var(--card);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.2s;border-left:3px solid transparent}
+.browse-item:hover{border-left-color:var(--accent)}
+.browse-item .pl{font-weight:600;margin-bottom:4px}
+.browse-item .ru{font-size:.85em;color:var(--text2)}
+.browse-item .status{float:right;font-size:.7em;padding:3px 8px;border-radius:8px;margin-left:8px}
+.browse-item .status.new{background:rgba(233,69,96,.2);color:var(--accent)}
+.browse-item .status.learning{background:rgba(253,203,110,.2);color:var(--orange)}
+.browse-item .status.known{background:rgba(0,184,148,.2);color:var(--green)}
+.filter-bar{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap;align-items:center}
+.filter-bar input{flex:1;min-width:150px;padding:8px 14px;border:2px solid var(--card2);border-radius:10px;background:var(--card);color:var(--text);font-size:.85em;outline:none}
+.filter-bar input:focus{border-color:var(--accent)}
+.filter-btn{padding:6px 12px;border:2px solid var(--card2);border-radius:10px;background:transparent;color:var(--text2);cursor:pointer;font-size:.75em;transition:.2s;white-space:nowrap}
+.filter-btn.active{border-color:var(--accent);color:var(--text);background:rgba(233,69,96,.1)}
+.session-done{text-align:center;padding:40px 20px}
+.session-done h2{font-size:1.8em;margin-bottom:8px}
+.session-done .emoji{font-size:3em;margin-bottom:16px}
+.session-done p{color:var(--text2);margin-bottom:20px}
+.restart-btn{padding:12px 32px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-size:1em;font-weight:600;cursor:pointer;transition:.2s}
+.restart-btn:hover{opacity:.9;transform:scale(1.02)}
+.kbd-hints{text-align:center;font-size:.65em;color:var(--text2);opacity:.4;margin-top:8px}
+.kbd{background:var(--card);padding:2px 6px;border-radius:4px;font-family:monospace}
+@media(max-width:480px){
+  .card-word{font-size:1.3em}
+  .app{padding:10px}
+  .stat{min-width:60px;padding:8px}
+  .stat .num{font-size:1.1em}
+  .ans-btn{padding:8px 14px;font-size:.75em;min-width:70px}
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const CARDS_RAW = [
+["Na pozór","На первый взгляд, с виду","Nowy interfejs programu wydawał się na pozór skomplikowany, ale szybko się do niego przyzwyczaiłam.","Новый интерфейс программы казался на первый взгляд сложным, но я быстро к нему привыкла."],
+["Mieć niewiele wspólnego z...","Иметь мало общего с...","Moja praca ma niewiele wspólnego z tym, co studiowałam na uczelni.","Моя работа имеет мало общего с тем, что я изучала в университете."],
+["Sięgnąć po coś","Потянуться за чем-то, обратиться к чему-то","Sięgnęłam po telefon, żeby sprawdzić powiadomienia.","Я потянулась за телефоном, чтобы проверить уведомления."],
+["Bardzo mnie to nęci","Это меня очень манит / искушает","Ten deser czekoladowy bardzo mnie nęci.","Этот шоколадный десерт очень меня манит."],
+["Kwestionować czyjąś wiedzę","Ставить под сомнение чьи-то знания","Nikt nie kwestionuje twojej wiedzy.","Никто не ставит под сомнение твои знания."],
+["Niechby nawet...","Но пусть бы даже... / Даже если бы...","Niechby nawet padało, i tak pójdziemy na spacer.","Даже если бы пошел дождь, мы все равно пойдем на прогулку."],
+["O ile to jest w ogóle możliwe","Если это вообще возможно","Chciałabym dostać zwrot pieniędzy, o ile to jest w ogóle możliwe.","Я бы хотела получить возврат денег, если это вообще возможно."],
+["Im więcej... tym bardziej...","Чем больше... тем более...","Im więcej używam wtyczek AI, tym bardziej oszczędzam czas.","Чем больше я использую ИИ-плагины, тем больше экономлю время."],
+["Wizje rozwiały się","Видения / иллюзии развеялись","Moje wątpliwości rozwiały się po rozmowie z księgową.","Мои сомнения развеялись после разговора с бухгалтером."],
+["Zwrócić się na dawne tory","Вернуться в прежнее русло","Po urlopie życie zwróciło się na dawne tory.","После отпуска жизнь вернулась в прежнее русло."],
+["Noce zaś poświęcałem na naukę","Ночи же посвящал изучению","Noce zaś poświęcałam na naukę polskiego z książkami.","Ночи же я посвящала изучению польского с книгами."],
+["Muszę się przyznać","Я должна признаться","Muszę się przyznać, że zjadłam ostatni kawałek ciasta.","Должна признаться, что я съела последний кусок торта."],
+["Ulegać wahaniom","Подвергаться колебаниям / колебаться","Zasięgi naszych rolek w social mediach ulegają wahaniom.","Охваты наших рилс в соцсетях подвержены колебаниям."],
+["Zacząć się wahać","Начать сомневаться / колебаться","Zaczęłam się wahać, czy kupić ten płaszcz, bo jest dość drogi.","Я начала сомневаться, покупать ли это пальто, потому что оно довольно дорогое."],
+["Wobec trudności","Перед лицом трудностей","Zbyt jestem niecierpliwy wobec trudności.","Слишком я нетерпелив перед лицом трудностей."],
+["W rzeczywistości","В действительности / На самом деле","Wyglądał na spokojnego, ale w rzeczywistości bardzo się denerwował.","Он выглядел спокойным, но в действительности очень нервничал."],
+["Zawsze byłam przekonana, że...","Я всегда была убеждена, что...","Zawsze byłam przekonana, że automatyzacja biznesu to klucz do rozwoju.","Я всегда была убеждена, что автоматизация бизнеса — это ключ к развитию."],
+["Odwlekać się","Откладываться / Затягиваться","Remont kuchni ciągle się odwleka, bo brakuje materiałów.","Ремонт кухни постоянно откладывается, потому что не хватает материалов."],
+["Zapowiadać się pomyślnie","Обещать быть успешным","Ten nowy projekt wideo zapowiada się bardzo pomyślnie.","Этот новый видеопроект обещает быть очень успешным."],
+["Zwłaszcza gdy...","Особенно когда...","Lubię pracować rano, zwłaszcza gdy w biurze jest jeszcze cicho.","Я люблю работать утром, особенно когда в офисе еще тихо."],
+["Wysiłki muszą być uwieńczone powodzeniem","Усилия должны увенчаться успехом","Wierzę, że nasze wysiłki muszą być uwieńczone powodzeniem — za dużo pracy w to włożyliśmy.","Верю, что наши усилия должны увенчаться успехом — слишком много труда мы в это вложили."],
+["Bądź pewna, że...","Будь уверена, что...","Bądź pewna, że paczka dotrze przed weekendem.","Будь уверена, что посылка придёт до выходных."],
+["Mieć obawy co do czegoś","Иметь опасения / сомневаться","Mam obawy co do tego nowego pracownika — jest za mało doświadczony.","У меня есть опасения насчёт этого нового сотрудника — у него слишком мало опыта."],
+["Usiłować","Пытаться / Стараться","Usiłuję otworzyć ten słoik z dżemem, ale zakrętka się zacięła.","Я пытаюсь открыть эту банку с джемом, но крышка застряла."],
+["Ku mojemu zdumieniu","К моему удивлению","Ku mojemu zdumieniu, sklep był jeszcze otwarty o dziesiątej wieczorem.","К моему удивлению, магазин был ещё открыт в десять вечера."],
+["Na skutek...","В результате... / Из-за...","Nasz lot do Hiszpanii został opóźniony na skutek silnej burzy.","Наш рейс в Испанию был задержан из-за сильной бури."],
+["Niemniej jednak","Тем не менее / И всё же","Byłam wczoraj bardzo zmęczona, niemniej jednak poszłam na basen.","Вчера я была очень уставшей, тем не менее пошла в бассейн."],
+["Przywrócić równowagę","Вернуть равновесие","Po trudnym tygodniu w pracy potrzebuję weekendu, żeby przywrócić równowagę.","После тяжёлой рабочей недели мне нужны выходные, чтобы вернуть равновесие."],
+["Rozpacz / Rozpaczać","Отчаяние / Отчаиваться","Nie płacz, nie ma sensu tak rozpaczać z powodu jednego egzaminu.","Не плачь, нет смысла так убиваться из-за одного экзамена."],
+["Stosunek","Отношение (к кому-либо)","Mam bardzo dobry stosunek do moich sąsiadów.","У меня очень хорошее отношение к моим соседям."],
+["Zaleta","Достоинство / плюс / преимущество","Główną zaletą tego mieszkania jest duży balkon.","Главное достоинство этой квартиры — большой балкон."],
+["Cierpienie","Страдание / мучение","Kiedy bolał mnie ząb, to było prawdziwe cierpienie.","Когда у меня болел зуб, это было настоящее мучение."],
+["Składać się na","Складываться из / состоять из","Na tę kwotę składa się rachunek za prąd i wodę.","Эта сумма складывается из счета за электричество и воду."],
+["Nie móc znieść","Не мочь терпеть / не выносить","Nie mogę już znosić tego hałasu za oknem.","Я больше не могу терпеть этот шум за окном."],
+["Treść","Содержание","Treść tej umowy wynajmu jest dla mnie jasna.","Содержание этого договора аренды мне понятно."],
+["Nie kojarzę","Не припоминаю / Не понимаю","Przepraszam, zupełnie nie kojarzę tej sytuacji.","Извините, я совершенно не припоминаю эту ситуацию."],
+["Żal","Сожаление / печаль / жаль","Mam wielki żal, że nie pojechaliśmy wczoraj nad morze.","Мне очень жаль, что мы не поехали вчера на море."],
+["Uścisnąć dłoń","Пожать руку","Na pożegnanie sąsiad mocno uścisnął mi dłoń.","На прощание сосед крепко пожал мне руку."],
+["Przystępnie","Доступно / понятно","Lekarz wyjaśnił mi moje wyniki badań bardzo przystępnie.","Врач объяснил мне мои результаты анализов очень доступно."],
+["Zdrowy rozsądek","Здравый смысл","Wystarczy odrobina zdrowego rozsądku, żeby nie klikać w podejrzane linki.","Достаточно капли здравого смысла, чтобы не кликать по подозрительным ссылкам."],
+["Nie do pomyślenia","Немыслимо","Wyjść z domu bez śniadania to dla mnie nie do pomyślenia.","Выйти из дома без завтрака для меня немыслимо."],
+["Tracić na wartości","Терять в цене / ценность","Stare smartfony bardzo szybko tracą na wartości.","Старые смартфоны очень быстро теряют в цене."],
+["Zdawać sobie sprawę","Отдавать себе отчет / понимать","Zdaję sobie sprawę, że to auto jest drogie, ale bardzo mi się podoba.","Я понимаю, что это авто дорогое, но оно мне очень нравится."],
+["Nie do zniesienia","Невыносимый / невыносимо","Ten letni upał w mieście jest po prostu nie do zniesienia.","Эта летняя жара в городе просто невыносима."],
+["Zrobić postępy","Сделать успехи / продвинуться","Moja córka zrobiła ogromne postępy w nauce pływania w tym miesiącu.","Моя дочь сделала огромные успехи в обучении плаванию в этом месяце."],
+["Pokusić się o","Решиться на / попытаться","Pokusiłam się o zrobienie tortu na urodziny męża, chociaż nigdy wcześniej nie piekłam.","Я решилась сделать торт на день рождения мужа, хотя никогда раньше не пекла."],
+["Mogę się pokusić","Я могу попытаться / рискнуть","Mogę się pokusić o ugotowanie czegoś tajskiego na kolację.","Могу попробовать приготовить что-нибудь тайское на ужин."],
+["Wątpliwość","Сомнение","Kupiłam te bilety do Madrytu bez żadnych wątpliwości.","Я купила эти билеты в Мадрид без всяких сомнений."],
+["Wątpić","Сомневаться","Czasami wątpię, czy kiedykolwiek opanuję polską gramatykę.","Иногда я сомневаюсь, освою ли когда-нибудь польскую грамматику."],
+["Postępować naprzód","Продвигаться вперед","Remont naszej nowej kuchni w końcu postępuje naprzód.","Ремонт нашей новой кухни наконец-то продвигается вперед."],
+["Postęp","Прогресс / продвижение","Cieszę się z twojego postępu w nauce języka — mówisz coraz lepiej!","Я рада твоему прогрессу в изучении языка — ты говоришь всё лучше!"],
+["Przynajmniej","По крайней мере / хотя бы","Zgubiłam się w drodze do muzeum, ale przynajmniej wypiłam świetną kawę.","Я потерялась по пути в музей, но по крайней мере выпила отличный кофе."],
+["Niewłaściwy","Неподходящий / неправильный","Kupiłam buty w niewłaściwym rozmiarze.","Я купила обувь неподходящего размера."],
+["Nie bierz mi za złe","Не обижайся / не держи зла","Nie bierz mi za złe, ale ta sukienka ci nie pasuje.","Не обижайся, но это платье тебе не идёт."],
+["Ścigać","Преследовать / гнаться","Mój kot uwielbia ścigać muchy po całym mieszkaniu.","Мой кот обожает гоняться за мухами по всей квартире."],
+["Ohydny","Отвратительный / мерзкий","Ten syrop na kaszel ma ohydny smak.","Этот сироп от кашля имеет отвратительный вкус."],
+["Pochłonięty","Поглощенный / увлеченный","Byłam wczoraj całkowicie pochłonięta nowym serialem i zapomniałam o kolacji.","Вчера я была полностью поглощена новым сериалом и забыла про ужин."],
+["Na samo wspomnienie","При одном только воспоминании","Na samo wspomnienie tego obiadu w restauracji robi mi się niedobrze.","При одном воспоминании об этом обеде в ресторане мне становится дурно."],
+["Skupić się / Skupiać się","Сосредоточиться / сосредотачиваться","Nie mogę się skupić na pracy, kiedy sąsiad wieci ścianę.","Не могу сосредоточиться на работе, когда сосед сверлит стену."],
+["Muszę się jeszcze nad tym zastanowić","Мне нужно еще над этим подумать","To dobra oferta, ale muszę się jeszcze nad tym zastanowić przed podpisaniem umowy.","Это хорошее предложение, но мне нужно ещё подумать перед подписанием договора."],
+["Utknąć w martwym punkcie","Зайти в тупик","Negocjacje z dostawcą utknęły w martwym punkcie — nikt nie chce ustąpić.","Переговоры с поставщиком зашли в тупик — никто не хочет уступить."],
+["Ogarnięty (czymś)","Охваченный (чем-то)","Była ogarnięta paniką, kiedy nie mogła znaleźć paszportu na lotnisku.","Она была охвачена паникой, когда не могла найти паспорт в аэропорту."],
+["Dzieje się coś podejrzanego","Происходит что-то подозрительное","Na mojej karcie pojawiły się dziwne transakcje — chyba dzieje się coś podejrzanego.","На моей карте появились странные транзакции — кажется, происходит что-то подозрительное."],
+["Niejednokrotnie podejmowała próby","Неоднократно предпринимала попытки","Niejednokrotnie podejmowałam próby rzucenia cukru, ale ciągle wracam do słodyczy.","Я неоднократно предпринимала попытки бросить сахар, но постоянно возвращаюсь к сладкому."],
+["Nietknięta","Нетронутая","Kolacja została nietknięta — nikt nie miał apetytu po tej wiadomości.","Ужин остался нетронутым — ни у кого не было аппетита после этой новости."],
+["By tak rzec","Так сказать","To jest, by tak rzec, nasza nieoficjalna tradycja firmowa.","Это, так сказать, наша неофициальная корпоративная традиция."],
+["Na wszelki wypadek","На всякий случай","Weź parasol na wszelki wypadek, bo prognoza nie jest pewna.","Возьми зонт на всякий случай, потому что прогноз неточный."],
+["Lecz mimo to","Но, несмотря на это","Było bardzo zimno, lecz mimo to poszliśmy na spacer po plaży.","Было очень холодно, но, несмотря на это, мы пошли гулять по пляжу."],
+["Nie mam żadnego pomysłu","У меня нет никакой идеи","Nie mam żadnego pomysłu, co kupić mamie na urodziny.","У меня нет никакой идеи, что купить маме на день рождения."],
+["Pokładać nadzieję","Возлагать надежды","Pokładam wielkie nadzieje w tym nowym projekcie — może wreszcie się uda.","Я возлагаю большие надежды на этот новый проект — может, наконец-то получится."],
+["Nie zawracaj mi głowy!","Не морочь мне голову!","Nie zawracaj mi głowy takimi drobiazgami — mam ważniejsze sprawy.","Не морочь мне голову такими мелочами — у меня есть дела поважнее."],
+["Obejść się bez","Обходиться без чего-либо","Nie mogę obejść się bez kawy rano.","Я не могу обойтись без кофе утром."],
+["Nie obejdzie się bez...","Не обойтись без...","Na tym spotkaniu nie obejdzie się bez tłumacza — nikt nie mówi po angielsku.","На этой встрече не обойтись без переводчика — никто не говорит по-английски."],
+["Zmieszać się","Смутиться / прийти в замешательство","Kiedy szef pochwalił mnie przy wszystkich, kompletnie się zmieszałam.","Когда шеф похвалил меня при всех, я совершенно смутилась."],
+["Wściekłość","Ярость","Poczułam wściekłość, kiedy zobaczyłam zarysowane auto na parkingu.","Я почувствовала ярость, когда увидела поцарапанную машину на парковке."],
+["Miasteczko sprawiało dziwne wrażenie","Городок производил странное впечатление","To miasteczko sprawiało dziwne wrażenie — wszystkie sklepy były zamknięte w środku dnia.","Этот городок производил странное впечатление — все магазины были закрыты посреди дня."],
+["Uprzejmie odpowiedział","Вежливо ответил","Kelner uprzejmie odpowiedział, że niestety nie ma już wolnych stolików.","Официант вежливо ответил, что, к сожалению, свободных столиков больше нет."],
+["Obawiać się podstępu","Опасаться подвоха / хитрости","Obawiam się, że nie zdążymy na pociąg — zostało tylko dziesięć minut.","Боюсь, что мы не успеем на поезд — осталось только десять минут."],
+["Wyraźnie nie do żartów","Явно не до шуток","Szefowa weszła do biura z taką miną, że wyraźnie nie było jej do żartów.","Начальница вошла в офис с таким лицом, что ей явно было не до шуток."],
+["Natychmiast","Немедленно, тотчас","Musisz natychmiast wrócić do domu — zadzwonił hydraulik.","Ты должен немедленно вернуться домой — звонил сантехник."],
+["Nie wolno odnosić się z pogardą","Нельзя относиться с презрением","Nie wolno odnosić się z pogardą do ludzi, którzy zarabiają mniej od nas.","Нельзя относиться с презрением к людям, которые зарабатывают меньше нас."],
+["Przeżyłem wstrząs","Я испытал шок","Przeżyłam wstrząs, kiedy dowiedziałam się o cenie za naprawę samochodu.","Я испытала шок, когда узнала цену за ремонт машины."],
+["W razie (czegoś)","В случае (чего-либо)","W razie deszczu weź parasol, w razie słońca — krem z filtrem.","В случае дождя возьми зонт, в случае солнца — крем с SPF."],
+["Przechodzić wszelkie pojęcie","Выходить за рамки понимания","Ceny mieszkań w Warszawie przechodzą wszelkie pojęcie.","Цены на квартиры в Варшаве выходят за рамки понимания."],
+["Nawiasem mówiąc","Между прочим","Nawiasem mówiąc, ten sklep ma promocję do końca tygodnia.","Между прочим, в этом магазине акция до конца недели."],
+["Zabić nudę","Убить скуку","Wziąłem książkę, żeby jakoś zabić nudę w pociągu.","Я взял книгу, чтобы как-то убить скуку в поезде."],
+["Wydają się zbędne","Это кажется лишним","Twoje wyjaśnienia wydają się zbędne, wszystko już rozumiem.","Твои объяснения кажутся лишними, я всё уже понимаю."],
+["Maczać w czymś palce","Быть замешанным в чем-то","Podejrzewam, że sąsiad maczał palce w zniknięciu mojej paczki.","Подозреваю, что сосед был замешан в пропаже моей посылки."],
+["Pysznić się (czymś)","Гордиться / Хвастаться / Кичиться","Nie powinieneś tak pysznić się swoimi sukcesami — to odstrasza ludzi.","Тебе не стоит так кичиться своими успехами — это отпугивает людей."],
+["A kto potrafi dowieść, że nie kłamiesz?","А кто может доказать, что не врешь?","A kto potrafi dowieść, że ta recenzja jest prawdziwa, a nie kupiona?","А кто может доказать, что этот отзыв настоящий, а не купленный?"],
+["Dojść do siebie","Прийти в себя, оправиться","Po grypie potrzebowałam tygodnia, żeby dojść do siebie.","После гриппа мне понадобилась неделя, чтобы прийти в себя."],
+["Uznać","Признать / счесть","Firma uznała moją reklamację i zwróciła pieniądze.","Фирма признала мою рекламацию и вернула деньги."],
+["Uchodzi za (coś/kogoś)","Считается (чем-то/кем-то)","Ta restauracja uchodzi za najlepszą w mieście, ale mnie nie zachwyciła.","Этот ресторан считается лучшим в городе, но меня не впечатлил."],
+["Uważać kogoś za","Считать кого-то кем-то","Uważam go za najlepszego fryzjera w okolicy.","Считаю его лучшим парикмахером в округе."],
+["Skinęła głową","Она кивнула","Zapytałam ją, czy chce kawę, i skinęła głową.","Я спросила её, хочет ли она кофе, и она кивнула."],
+["Przejść do rzeczy","Перейти к делу / к сути","Nie traćmy czasu, przejdźmy do rzeczy — ile to będzie kosztować?","Не будем терять время, перейдём к делу — сколько это будет стоить?"],
+["O to właśnie chodzi!","В этом-то и дело!","O to właśnie chodzi — problem nie w cenie, a w jakości!","В этом-то и дело — проблема не в цене, а в качестве!"],
+["Ani się waż!","Даже не смей! / Не вздумай!","Ani się waż ruszać moje ciasto z lodówki!","Даже не смей трогать мой торт из холодильника!"],
+["Brać pod uwagę","Принимать во внимание","Musimy wziąć pod uwagę koszty dostawy przy wyborze sklepu.","Мы должны принять во внимание стоимость доставки при выборе магазина."],
+["Zatrzasnąć","Захлопнуть","Wiatr zatrzasnął drzwi, a klucze zostały w środku.","Ветер захлопнул дверь, а ключи остались внутри."],
+["Nie ma się co oszukiwać","Нечего себя обманывать","Nie ma się co oszukiwać — ta dieta nie działa, muszę zmienić podejście.","Нечего себя обманывать — эта диета не работает, надо менять подход."],
+["Niby drobiazg, ale humor zepsuty","Вроде бы мелочь, но настроение испорчено","Ktoś zajął moje miejsce parkingowe — niby drobiazg, ale humor zepsuty na cały dzień.","Кто-то занял моё парковочное место — вроде мелочь, но настроение испорчено на весь день."],
+["Wzruszyć ramionami","Пожать плечами","Zapytałam go, gdzie są klucze, a on tylko wzruszył ramionami.","Я спросила его, где ключи, а он только пожал плечами."],
+["Nie znoszę kłamstwa","Терпеть не могу ложь","Nie znoszę kłamstwa — wolę usłyszeć nieprzyjemną prawdę.","Терпеть не могу ложь — предпочитаю услышать неприятную правду."],
+["W innym wypadku","В противном случае","Musisz zapłacić fakturę do piątku, w innym wypadku naliczą odsetki.","Нужно оплатить счёт до пятницы, в противном случае начислят проценты."],
+["Trudno się domyślić prawdy","Трудно догадаться о правде","Po jej uśmiechu trudno się domyślić prawdy — tak naprawdę jest bardzo smutna.","По её улыбке трудно догадаться о правде — на самом деле ей очень грустно."],
+["Rozejrzeć się wokół siebie","Осмотреться вокруг себя","Weszłam do nowego biura i rozejrzałam się wokół siebie — wyglądało super.","Я вошла в новый офис и осмотрелась вокруг — выглядело отлично."],
+["Zachowuje niewzruszony spokój","Сохраняет невозмутимое спокойствие","Mój mąż zawsze zachowuje niewzruszony spokój, nawet w korku na autostradzie.","Мой муж всегда сохраняет невозмутимое спокойствие, даже в пробке на автостраде."],
+["Głupstwa niewarte uwagi","Пустяки, не стоящие внимания","Nie przejmuj się komentarzami w internecie — to głupstwa niewarte uwagi.","Не переживай из-за комментариев в интернете — это пустяки, не стоящие внимания."],
+["Ostateczny cel","Конечная цель","Ostateczny cel tego projektu to zwiększenie sprzedaży o trzydzieści procent.","Конечная цель этого проекта — увеличить продажи на тридцать процентов."],
+["Zresztą","Впрочем / кстати","Nie chcę tam iść, zresztą jestem zmęczona.","Я не хочу туда идти, к тому же я устала."],
+["Na razie","Пока / на данный момент","To na razie wystarczy, resztę dokończymy jutro.","Этого пока достаточно, остальное доделаем завтра."],
+["Zastanawiałem się nad tym","Я об этом размышлял","Długo zastanawiałam się nad tym, czy zmienić pracę — i w końcu podjęłam decyzję.","Я долго размышляла об этом, менять ли работу — и наконец приняла решение."],
+["Odpędzać od siebie myśli","Отгонять от себя мысли","Próbuję odpędzać od siebie myśli o pracy, kiedy jestem na wakacjach.","Пытаюсь отгонять от себя мысли о работе, когда я в отпуске."],
+["Zapanowało grobowe milczenie","Воцарилось гробовое молчание","Kiedy szef ogłosił zwolnienia, w sali zapanowało grobowe milczenie.","Когда шеф объявил об увольнениях, в зале воцарилось гробовое молчание."],
+["Z całą pewnością","Совершенно точно, несомненно","Z całą pewnością mogę powiedzieć, że to najlepsza pizza w mieście.","Совершенно точно могу сказать, что это лучшая пицца в городе."],
+["Pewność siebie","Уверенность в себе","Po kursie wystąpień publicznych zyskała dużą pewność siebie.","После курса публичных выступлений она обрела большую уверенность в себе."],
+["Nie marnować czasu","Не терять время зря","Nie marnuj czasu na scrollowanie — lepiej pójdź na spacer.","Не трать время на скроллинг — лучше сходи на прогулку."],
+["Im dłużej... tym większą...","Чем дольше... тем больше...","Im dłużej tu mieszkam, tym większą czuję więź z tym miastem.","Чем дольше я тут живу, тем большую связь чувствую с этим городом."],
+["Udawać osłabionego","Притворяться слабым","Dziecko udawało osłabione, żeby nie iść do szkoły.","Ребёнок притворялся слабым, чтобы не идти в школу."],
+["Mieszać się do czegoś","Вмешиваться во что-то","Nie mieszaj się do ich kłótni — sami to rozwiążą.","Не вмешивайся в их ссору — сами разберутся."],
+["Wzbudzać podejrzenia","Вызывать подозрения","Ten facet, który kręci się po parkingu trzeci raz, wzbudza moje podejrzenia.","Этот мужик, который кружит по парковке третий раз, вызывает мои подозрения."],
+["Przeprowadzić rewizję","Провести обыск","Policja musiała przeprowadzić rewizję w mieszkaniu podejrzanego.","Полиции пришлось провести обыск в квартире подозреваемого."],
+["Rozłożyć ręce","Развести руками","Mechanik rozłożył ręce i powiedział, że naprawa potrwa tydzień.","Механик развёл руками и сказал, что ремонт займёт неделю."],
+["Przepaść bez wieści","Пропасть без вести","Moja paczka z Chin przepadła bez wieści — tracking nie działa od tygodnia.","Моя посылка из Китая пропала без вести — трекинг не работает уже неделю."],
+["Wypsnęło mi się","Вырвалось (слово), сорвалось с языка","Wypsnęło mi się o niespodziance i teraz wszyscy wiedzą.","У меня вырвалось про сюрприз, и теперь все знают."],
+["Zemdleć / wpaść w omdlenie","Упасть в обморок","Kobieta zemdlała w metrze z powodu upału — na szczęście ktoś pomógł.","Женщина упала в обморок в метро из-за жары — к счастью, кто-то помог."],
+["Nie uląkł się trudności","Он не испугался трудностей","Nie uląkłam się trudności i otworzyłam własną firmę.","Я не испугалась трудностей и открыла свою фирму."],
+["Pomyślnie","Успешно / благополучно","Operacja przebiegła pomyślnie — lekarz jest zadowolony.","Операция прошла успешно — врач доволен."],
+["Popełnić przestępstwo","Совершить преступление","Ktoś popełnił przestępstwo — okradł sklep na rogu naszej ulicy.","Кто-то совершил преступление — обокрал магазин на углу нашей улицы."],
+["Chciałbym zaprzyjaźnić się","Хотел бы подружиться","Chciałabym zaprzyjaźnić się z nowymi koleżankami z pracy.","Хотела бы подружиться с новыми коллегами на работе."],
+["Wreszcie się przydało","Наконец-то пригодилось","Uczyłam się excela latami i wreszcie się przydało — dostałam awans.","Я годами учила Excel, и наконец-то это пригодилось — я получила повышение."],
+["Dopiero","Только / только что","Dopiero wróciłam z pracy, a ty już chcesz iść na zakupy?","Я только что вернулась с работы, а ты уже хочешь идти за покупками?"],
+["Nadal","Всё ещё / по-прежнему","Nadal czekam na odpowiedź z urzędu — minął już miesiąc.","Я всё ещё жду ответа из учреждения — прошёл уже месяц."],
+["Akurat","Именно / как раз","Akurat dzisiaj nie mam czasu — może jutro?","Именно сегодня у меня нет времени — может, завтра?"],
+["Przecież","Ведь / же","Przecież mówiłam ci, żebyś wziął klucze!","Я ведь тебе говорила, чтобы ты взял ключи!"],
+["Chociaż","Хотя / несмотря на то что","Chociaż pada deszcz, idę na spacer — potrzebuję świeżego powietrza.","Хотя идёт дождь, иду на прогулку — мне нужен свежий воздух."],
+["W sam raz","Как раз / в самый раз","Te buty są w sam raz — ani za ciasne, ani za luźne.","Эти туфли в самый раз — ни тесные, ни свободные."],
+["Ponieważ","Так как / поскольку / потому что","Ponieważ jest zimno, założyłam kurtkę i szalik.","Так как холодно, я надела куртку и шарф."],
+["Natomiast","А / же / напротив","Ja piję kawę, mój brat natomiast woli herbatę.","Я пью кофе, мой брат же предпочитает чай."],
+["Niemal","Почти / чуть ли не","Niemal zapomniałam o spotkaniu — dobrze, że telefon przypomniał.","Чуть не забыла о встрече — хорошо, что телефон напомнил."],
+["Bowiem","Ведь / поскольку / ибо","Nie mogę przyjść na imprezę, jestem bowiem na dyżurze w pracy.","Не могу прийти на вечеринку, я ведь на дежурстве на работе."],
+["Wbrew","Вопреки","Wbrew prognozom pogody, dzisiaj było słonecznie i ciepło.","Вопреки прогнозам погоды, сегодня было солнечно и тепло."],
+["Zaś","Же / а / в свою очередь","Ja piję czarną kawę, mój mąż zaś woli z mlekiem.","Я пью чёрный кофе, мой муж же предпочитает с молоком."],
+["Niebawem","Вскоре / скоро","Niebawem otworzą nowy sklep IKEA w naszym mieście.","Вскоре откроют новый магазин IKEA в нашем городе."],
+["Perfidny uwodziciel","Коварный соблазнитель","Okazał się perfidnym uwodzicielem — pisał do trzech dziewczyn naraz.","Он оказался коварным соблазнителем — писал трём девушкам одновременно."],
+];
+
+const cards = CARDS_RAW.map((c, i) => ({
+  id: i, pl: c[0], ru: c[1], exPl: c[2], exRu: c[3],
+}));
+
+const LS_KEY = 'polski_anki_v3';
+function loadProgress() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } }
+function saveProgress(p) { localStorage.setItem(LS_KEY, JSON.stringify(p)); }
+
+let progress = loadProgress();
+let currentMode = 'study';
+let currentDir = 'ru_pl';
+let deck = [];
+let deckIdx = 0;
+let flipped = false;
+let sessionStats = { total: 0, good: 0, hard: 0, again: 0, skipped: 0 };
+let quizAnswer = null;
+let searchQuery = '';
+let filterStatus = 'all';
+
+function getStatus(id) {
+  const p = progress[id];
+  if (!p) return 'new';
+  if (p.score >= 3) return 'known';
+  return 'learning';
+}
+function getStats() {
+  let n=0,l=0,k=0;
+  cards.forEach(c => { const s=getStatus(c.id); if(s==='new')n++;else if(s==='learning')l++;else k++; });
+  return {new:n,learning:l,known:k,total:cards.length};
+}
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+function buildDeck() {
+  const nw=cards.filter(c=>getStatus(c.id)==='new');
+  const lr=cards.filter(c=>getStatus(c.id)==='learning');
+  const kn=cards.filter(c=>getStatus(c.id)==='known');
+  deck=[...shuffle(lr),...shuffle(nw).slice(0,15),...shuffle(kn).slice(0,5)];
+  if(!deck.length) deck=shuffle([...cards]).slice(0,20);
+  deckIdx=0; flipped=false;
+  sessionStats={total:0,good:0,hard:0,again:0,skipped:0};
+}
+function getFront(card) {
+  if(currentDir==='ru_pl') return {text:card.ru,lang:'RU',hint:'Переведи на польский'};
+  return {text:card.pl,lang:'PL',hint:'Переведи на русский'};
+}
+function getBack(card) {
+  if(currentDir==='ru_pl') return {text:card.pl,lang:'PL'};
+  return {text:card.ru,lang:'RU'};
+}
+
+function render() {
+  const app=document.getElementById('app');
+  const stats=getStats();
+  let html=`
+    <div class="header">
+      <h1>Polski Flashcards</h1>
+      <div class="sub">${cards.length} fraz i slów do nauki</div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat red"><div class="num">${stats.new}</div><div class="label">Nowe</div></div>
+      <div class="stat orange"><div class="num">${stats.learning}</div><div class="label">Uczenie</div></div>
+      <div class="stat green"><div class="num">${stats.known}</div><div class="label">Znane</div></div>
+    </div>
+    <div class="modes">
+      <button class="mode-btn ${currentMode==='study'?'active':''}" onclick="setMode('study')"><span class="icon">&#x1F4DA;</span>Karty</button>
+      <button class="mode-btn ${currentMode==='quiz'?'active':''}" onclick="setMode('quiz')"><span class="icon">&#x2753;</span>Quiz</button>
+      <button class="mode-btn ${currentMode==='browse'?'active':''}" onclick="setMode('browse')"><span class="icon">&#x1F4CB;</span>Lista</button>
+    </div>`;
+
+  if(currentMode!=='browse') {
+    html+=`
+    <div class="directions">
+      <button class="dir-btn ${currentDir==='ru_pl'?'active':''}" onclick="setDir('ru_pl')">RU &#x2192; PL</button>
+      <button class="dir-btn ${currentDir==='pl_ru'?'active':''}" onclick="setDir('pl_ru')">PL &#x2192; RU</button>
+    </div>`;
+  }
+
+  if(currentMode==='study') html+=renderStudy();
+  else if(currentMode==='quiz') html+=renderQuiz();
+  else html+=renderBrowse();
+  app.innerHTML=html;
+}
+
+function renderStudy() {
+  if(!deck.length) buildDeck();
+  if(deckIdx>=deck.length) return renderDone();
+  const card=deck[deckIdx];
+  const front=getFront(card);
+  const back=getBack(card);
+  const pct=deck.length>0?Math.round((deckIdx/deck.length)*100):0;
+
+  let backExtra='';
+  if(card.exPl) {
+    backExtra=`<div class="card-example"><strong>${card.exPl}</strong><br>${card.exRu}</div>`;
+  }
+
+  let html=`
+    <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card-container" onclick="flipCard()">
+      <div class="flashcard ${flipped?'flipped':''}" id="flashcard">
+        <div class="card-face card-front">
+          <div class="card-category">${front.lang}</div>
+          <div class="card-counter">${deckIdx+1} / ${deck.length}</div>
+          <div class="card-word">${front.text}</div>
+          <div class="card-hint">${front.hint}</div>
+          <div class="tap-hint">&#x1F447; tap to flip</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-category">${back.lang}</div>
+          <div class="card-counter">${deckIdx+1} / ${deck.length}</div>
+          <div class="card-word">${back.text}</div>
+          ${backExtra}
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar fade-in">`;
+
+  if(flipped) {
+    html+=`
+      <button class="ans-btn again" onclick="event.stopPropagation();answer(0)">&#x1F504; Ещё</button>
+      <button class="ans-btn hard" onclick="event.stopPropagation();answer(1)">&#x1F914; Трудно</button>
+      <button class="ans-btn good" onclick="event.stopPropagation();answer(2)">&#x2705; Знаю</button>`;
+  }
+
+  html+=`
+      <button class="next-arrow" onclick="event.stopPropagation();skipCard()" title="Дальше (без оценки)">&#x27A1;</button>
+    </div>
+    <div class="kbd-hints"><span class="kbd">Space</span> flip &nbsp; <span class="kbd">&#x2192;</span> next &nbsp; <span class="kbd">1</span> again <span class="kbd">2</span> hard <span class="kbd">3</span> good</div>`;
+  return html;
+}
+
+function renderQuiz() {
+  if(!deck.length) buildDeck();
+  if(deckIdx>=deck.length) return renderDone();
+  const card=deck[deckIdx];
+  const front=getFront(card);
+  const pct=deck.length>0?Math.round((deckIdx/deck.length)*100):0;
+
+  let options=[card];
+  const others=cards.filter(c=>c.id!==card.id);
+  const sh=shuffle(others);
+  for(let i=0;options.length<4&&i<sh.length;i++) options.push(sh[i]);
+  options=shuffle(options);
+
+  let html=`
+    <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card-container" style="min-height:120px;align-items:flex-end">
+      <div style="text-align:center">
+        <div style="font-size:.75em;color:var(--text2);margin-bottom:8px">${front.lang} &#x2192; ${currentDir==='ru_pl'?'PL':'RU'} &nbsp; (${deckIdx+1}/${deck.length})</div>
+        <div class="card-word" style="font-size:1.5em">${front.text}</div>
+      </div>
+    </div>
+    <div class="quiz-options">`;
+
+  options.forEach((opt,i) => {
+    const back=getBack(opt);
+    let cls='';
+    if(quizAnswer!==null){
+      if(opt.id===card.id) cls='correct';
+      else if(quizAnswer===i&&opt.id!==card.id) cls='wrong';
+    }
+    const dis=quizAnswer!==null?'pointer-events:none':'';
+    html+=`<div class="quiz-opt ${cls}" style="${dis}" onclick="quizSelect(${i},${opt.id===card.id})">${back.text}</div>`;
+  });
+
+  html+=`</div>`;
+  if(quizAnswer!==null) {
+    const card2=deck[deckIdx];
+    let ex='';
+    if(card2.exPl) ex=`<div style="text-align:center;margin-top:10px;font-size:.82em;color:var(--text2)"><strong style="color:var(--text)">${card2.exPl}</strong><br>${card2.exRu}</div>`;
+    html+=ex+`<div style="text-align:center;margin-top:12px"><button class="next-arrow" onclick="nextQuiz()" style="display:inline-flex">&#x27A1;</button></div>`;
+  }
+  return html;
+}
+
+function renderBrowse() {
+  let filtered=cards;
+  if(searchQuery){const q=searchQuery.toLowerCase();filtered=filtered.filter(c=>c.pl.toLowerCase().includes(q)||c.ru.toLowerCase().includes(q));}
+  if(filterStatus!=='all') filtered=filtered.filter(c=>getStatus(c.id)===filterStatus);
+  let html=`
+    <div class="filter-bar">
+      <input type="text" placeholder="Szukaj / Искать..." value="${searchQuery}" oninput="searchQuery=this.value;render()">
+      <button class="filter-btn ${filterStatus==='all'?'active':''}" onclick="filterStatus='all';render()">Wszystko</button>
+      <button class="filter-btn ${filterStatus==='new'?'active':''}" onclick="filterStatus='new';render()">Nowe</button>
+      <button class="filter-btn ${filterStatus==='learning'?'active':''}" onclick="filterStatus='learning';render()">Uczenie</button>
+      <button class="filter-btn ${filterStatus==='known'?'active':''}" onclick="filterStatus='known';render()">Znane</button>
+    </div>
+    <div style="font-size:.75em;color:var(--text2);margin-bottom:8px">${filtered.length} kart</div>
+    <div class="browse-list">`;
+
+  filtered.forEach(c => {
+    const s=getStatus(c.id);
+    const sC=s==='new'?'new':s==='learning'?'learning':'known';
+    const sL=s==='new'?'Nowa':s==='learning'?'Uczenie':'Znana';
+    html+=`
+      <div class="browse-item" onclick="this.querySelector('.detail').style.display=this.querySelector('.detail').style.display==='none'?'block':'none'">
+        <span class="status ${sC}">${sL}</span>
+        <div class="pl">${c.pl}</div>
+        <div class="ru">${c.ru}</div>
+        <div class="detail" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">
+          ${c.exPl?`<div style="font-size:.82em;color:var(--text2)"><strong style="color:var(--text)">${c.exPl}</strong><br>${c.exRu}</div>`:''}
+        </div>
+      </div>`;
+  });
+
+  html+=`</div>`;
+  if(Object.keys(progress).length>0){
+    html+=`<div style="text-align:center;margin-top:16px"><button class="restart-btn" onclick="if(confirm('Сбросить весь прогресс?')){progress={};saveProgress(progress);render()}" style="background:var(--card);border:1px solid var(--red);padding:8px 20px;font-size:.8em">&#x1F5D1; Сбросить прогресс</button></div>`;
+  }
+  return html;
+}
+
+function renderDone() {
+  const rated=sessionStats.good+sessionStats.hard+sessionStats.again;
+  const pct=rated>0?Math.round((sessionStats.good/rated)*100):0;
+  const emoji=pct>=80?'&#x1F389;':pct>=50?'&#x1F44D;':'&#x1F4AA;';
+  return `
+    <div class="session-done fade-in">
+      <div class="emoji">${emoji}</div>
+      <h2>Sesja zakończona!</h2>
+      <p>Пройдено: ${sessionStats.total} &bull; Знаю: ${sessionStats.good} &bull; Трудно: ${sessionStats.hard} &bull; Ещё раз: ${sessionStats.again} &bull; Пропущено: ${sessionStats.skipped}</p>
+      <div style="margin-bottom:20px">
+        <div class="progress-wrap" style="height:10px"><div class="progress-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)'}"></div></div>
+        <div style="font-size:.8em;color:var(--text2);margin-top:4px">${rated>0?pct+'% правильных':'Оценок не было'}</div>
+      </div>
+      <button class="restart-btn" onclick="buildDeck();render()">&#x1F504; Nowa sesja</button>
+    </div>`;
+}
+
+function setMode(m){currentMode=m;if(m!=='browse')buildDeck();quizAnswer=null;render();}
+function setDir(d){currentDir=d;buildDeck();quizAnswer=null;render();}
+function flipCard(){flipped=!flipped;render();}
+
+function skipCard() {
+  sessionStats.skipped++;
+  sessionStats.total++;
+  deckIdx++;
+  flipped=false;
+  render();
+}
+
+function answer(score) {
+  const card=deck[deckIdx];
+  const p=progress[card.id]||{score:0,reviews:0};
+  p.reviews++;
+  if(score===0){p.score=Math.max(0,p.score-1);sessionStats.again++;}
+  else if(score===1){p.score=Math.min(p.score+1,5);sessionStats.hard++;}
+  else{p.score=Math.min(p.score+2,5);sessionStats.good++;}
+  p.lastReview=Date.now();
+  progress[card.id]=p;
+  saveProgress(progress);
+  sessionStats.total++;
+  if(score===0){const later=Math.min(deckIdx+3+Math.floor(Math.random()*4),deck.length);deck.splice(later,0,card);}
+  deckIdx++;flipped=false;render();
+}
+
+function quizSelect(idx,correct) {
+  quizAnswer=idx;
+  const card=deck[deckIdx];
+  const p=progress[card.id]||{score:0,reviews:0};
+  p.reviews++;
+  if(correct){p.score=Math.min(p.score+2,5);sessionStats.good++;}
+  else{p.score=Math.max(0,p.score-1);sessionStats.again++;}
+  p.lastReview=Date.now();
+  progress[card.id]=p;
+  saveProgress(progress);
+  sessionStats.total++;
+  render();
+}
+function nextQuiz(){quizAnswer=null;deckIdx++;render();}
+
+document.addEventListener('keydown',e=>{
+  if(currentMode==='study'){
+    if(e.code==='Space'){e.preventDefault();flipCard();}
+    if(e.code==='ArrowRight'){e.preventDefault();skipCard();}
+    if(flipped&&e.key==='1')answer(0);
+    if(flipped&&e.key==='2')answer(1);
+    if(flipped&&e.key==='3')answer(2);
+  }
+  if(currentMode==='quiz'&&quizAnswer!==null){
+    if(e.code==='Space'||e.code==='Enter'||e.code==='ArrowRight'){e.preventDefault();nextQuiz();}
+  }
+});
+
+buildDeck();render();
+</script>
+</body>
+</html>
