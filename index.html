@@ -40,7 +40,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .dir-btn:hover{border-color:var(--accent)}
 .dir-btn.active{border-color:var(--accent);color:var(--text);background:rgba(233,69,96,.15)}
 .card-container{display:flex;align-items:flex-start;justify-content:center;perspective:1000px;margin:4px 0;padding-top:8px}
-.flashcard{width:100%;max-width:500px;min-height:260px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
+.flashcard{width:100%;max-width:500px;min-height:300px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
 .flashcard.flipped{transform:rotateY(180deg)}
 .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;padding:14px 20px 20px;text-align:center}
 .card-front{background:linear-gradient(145deg,#1a1a2e,#16213e);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.05)}
@@ -60,8 +60,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .ans-btn.again{background:var(--red);color:#fff}
 .ans-btn.hard{background:var(--orange);color:#333}
 .ans-btn.good{background:var(--green);color:#fff}
-.next-arrow{width:52px;height:52px;border-radius:50%;border:2px solid var(--card2);background:var(--card);color:var(--text);font-size:1.4em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
-.bottom-bar .next-arrow{width:60px;height:44px;border-radius:12px;font-size:1.3em}
+.next-arrow{width:60px;height:60px;border-radius:50%;border:2px solid var(--card2);background:var(--card);color:var(--text);font-size:1.6em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.bottom-bar .next-arrow{width:70px;height:54px;border-radius:14px;font-size:1.5em}
 .next-arrow:hover{border-color:var(--accent);background:rgba(233,69,96,.12);transform:scale(1.08)}
 .next-arrow:active{transform:scale(.95)}
 .progress-wrap{margin:8px 0;height:6px;background:var(--card);border-radius:3px;overflow:hidden}
@@ -98,7 +98,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   .app{padding:10px;padding-top:env(safe-area-inset-top, 20px)}
   .stat{min-width:60px;padding:6px}
   .stat .num{font-size:1.1em}
-  .ans-btn{padding:8px 14px;font-size:.75em;min-width:70px}
+  .ans-btn{padding:12px 20px;font-size:.85em;min-width:90px}
   .kbd-hints{display:none}
   .card-container{margin:2px 0;padding-top:4px}
   .flashcard{min-height:260px}
@@ -286,7 +286,7 @@ const CARDS_EN = [
 ["You see what I'm getting at here?","Понимаешь, к чему я клоню?","You see what I'm getting at? We need to change the strategy.","Понимаешь, к чему я клоню? Нам нужно менять стратегию.","General"],
 ["Your English is going along all right","С твоим английским всё идёт хорошо","Your English is going along all right, you just need more practice.","С твоим английским всё идёт хорошо, тебе просто нужно больше практики.","General"],
 ["You don't even have to think about this","Вам даже не нужно об этом думать","You don't even have to think about this, it works automatically.","Вам даже не нужно об этом думать, это работает автоматически.","General"],
-["I'm left with...","В итоге у меня получилось / осталось","I'm left with a great result after all the effort.","В итоге у меня получился отличный результат после всех усилий.","General"],
+["I'm left with...","Мне остаётся… / Я остаюсь с","I'm left with no choice.","У меня не остаётся выбора.","General"],
 ["Establish","Основывать / Устанавливать (факт)","Scientists have established a link between stress and heart disease.","Учёные установили связь между стрессом и болезнями сердца.","General"],
 ["Knickknacks","Безделушки, сувениры","Her shelves are full of knickknacks from different countries.","Её полки полны безделушек из разных стран.","General"],
 ["Learning English is something I will be focusing on this year","Изучение английского — это то, на чём я буду фокусироваться","Learning English is something I will be focusing on this year.","Изучение английского — это то, на чём я буду фокусироваться в этом году.","General"],
@@ -487,7 +487,7 @@ const LANGS = {
     dir1hint: 'Переведи на польский',
     dir2hint: 'Переведи на русский',
     sub: c => c+' fraz i słów do nauki',
-    ui: {nw:'Nowe',lr:'Uczenie',kn:'Znane',cards:'Karty',quiz:'Quiz',list:'Lista',search:'Szukaj / Искать...',all:'Wszystko',done:'Sesja zakończona!',newSession:'Nowa sesja',reset:'Сбросить прогресс',resetConfirm:'Сбросить весь прогресс?',again:'Ещё',hard:'Трудно',good:'Знаю',count:c=>c+' kart',passed:'Пройдено',know:'Знаю',hardL:'Трудно',againL:'Ещё раз',skipped:'Пропущено',correct:'правильных',noRatings:'Оценок не было',nowa:'Nowa',uczenie:'Uczenie',znana:'Znana'}
+    ui: {nw:'Nowe',lr:'Uczenie',kn:'Znane',cards:'Karty',quiz:'Quiz',list:'Lista',search:'Szukaj / Искать...',all:'All',done:'Sesja zakończona!',newSession:'Nowa sesja',reset:'Сбросить прогресс',resetConfirm:'Сбросить весь прогресс?',again:'Ещё',hard:'Трудно',good:'Знаю',count:c=>c+' kart',passed:'Пройдено',know:'Знаю',hardL:'Трудно',againL:'Ещё раз',skipped:'Пропущено',correct:'правильных',noRatings:'Оценок не было',nowa:'Nowa',uczenie:'Uczenie',znana:'Znana'}
   },
   en: {
     key: 'english_anki_v1',
@@ -703,7 +703,6 @@ function renderStudy() {
 
   if(flipped) {
     html+=`
-      <button class="ans-btn again" onclick="event.stopPropagation();answer(0)">&#x1F504; ${L().ui.again}</button>
       <button class="ans-btn hard" onclick="event.stopPropagation();answer(1)">&#x1F914; ${L().ui.hard}</button>
       <button class="ans-btn good" onclick="event.stopPropagation();answer(2)">&#x2705; ${L().ui.good}</button>`;
   }
@@ -835,7 +834,7 @@ function renderDone() {
     <div class="session-done fade-in">
       <div class="emoji">${emoji}</div>
       <h2>${L().ui.done}</h2>
-      <p>${L().ui.passed}: ${sessionStats.total} &bull; ${L().ui.know}: ${sessionStats.good} &bull; ${L().ui.hardL}: ${sessionStats.hard} &bull; ${L().ui.againL}: ${sessionStats.again} &bull; ${L().ui.skipped}: ${sessionStats.skipped}</p>
+      <p>${L().ui.passed}: ${sessionStats.total} &bull; ${L().ui.know}: ${sessionStats.good} &bull; ${L().ui.hardL}: ${sessionStats.hard} &bull; ${L().ui.skipped}: ${sessionStats.skipped}</p>
       <div style="margin-bottom:20px">
         <div class="progress-wrap" style="height:10px"><div class="progress-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)'}"></div></div>
         <div style="font-size:.8em;color:var(--text2);margin-top:4px">${rated>0?pct+'% '+L().ui.correct:L().ui.noRatings}</div>
@@ -906,7 +905,7 @@ document.addEventListener('keydown',e=>{
   if(currentMode==='study'){
     if(e.code==='Space'){e.preventDefault();flipCard();}
     if(e.code==='ArrowRight'){e.preventDefault();skipCard();}
-    if(flipped&&e.key==='1')answer(0);
+    if(flipped&&e.key==='1')answer(1);
     if(flipped&&e.key==='2')answer(1);
     if(flipped&&e.key==='3')answer(2);
   }
