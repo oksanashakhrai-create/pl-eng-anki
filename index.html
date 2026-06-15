@@ -40,7 +40,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .dir-btn:hover{border-color:var(--accent)}
 .dir-btn.active{border-color:var(--accent);color:var(--text);background:rgba(233,69,96,.15)}
 .card-container{display:flex;align-items:flex-start;justify-content:center;perspective:1000px;margin:4px 0;padding-top:8px}
-.flashcard{width:100%;max-width:500px;min-height:300px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
+.flashcard{width:100%;max-width:500px;min-height:420px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
 .flashcard.flipped{transform:rotateY(180deg)}
 .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;padding:14px 20px 20px;text-align:center}
 .card-front{background:linear-gradient(145deg,#1a1a2e,#16213e);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.05)}
@@ -49,9 +49,9 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .card-category{font-size:.65em;color:var(--accent);text-transform:uppercase;letter-spacing:1px;opacity:.7}
 .card-counter{font-size:.7em;color:var(--text2)}
 .card-content{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1}
-.card-word{font-size:1.6em;font-weight:600;line-height:1.4;margin-bottom:8px}
-.card-hint{font-size:.8em;color:var(--text2);margin-top:8px;font-style:italic}
-.card-example{font-size:.85em;color:var(--text2);margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);line-height:1.5;max-width:100%}
+.card-word{font-size:2.1em;font-weight:600;line-height:1.4;margin-bottom:8px}
+.card-hint{font-size:1em;color:var(--text2);margin-top:8px;font-style:italic}
+.card-example{font-size:1.1em;color:var(--text2);margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);line-height:1.5;max-width:100%}
 .card-example strong{color:var(--text);font-weight:500}
 .tap-hint{position:absolute;bottom:16px;font-size:.7em;color:var(--text2);opacity:.5}
 .bottom-bar{display:flex;gap:10px;margin:8px 0 4px;justify-content:center;align-items:center;flex-wrap:wrap}
@@ -101,9 +101,9 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   .ans-btn{padding:12px 20px;font-size:.85em;min-width:90px}
   .kbd-hints{display:none}
   .card-container{margin:2px 0;padding-top:4px}
-  .flashcard{min-height:260px}
-  .card-word{font-size:1.15em}
-  .card-example{font-size:.75em}
+  .flashcard{min-height:380px}
+  .card-word{font-size:1.7em}
+  .card-example{font-size:.95em}
   .header{padding:4px 0 2px}
   .header h1{font-size:1.4em}
   .progress-wrap{margin:4px 0}
@@ -296,7 +296,7 @@ const CARDS_EN = [
 ["Intentionally controlling","Намеренный (сознательный) контроль","She was intentionally controlling her breathing to stay calm.","Она намеренно контролировала дыхание, чтобы сохранять спокойствие.","General"],
 ["To carry weight","Иметь вес, иметь значение","His opinion carries a lot of weight in this company.","Его мнение имеет большой вес в этой компании.","General"],
 ["To take it a step too far","Зайти слишком далеко","I like his jokes, but this time he took it a step too far.","Мне нравятся его шутки, но в этот раз он зашел слишком далеко.","General"],
-["To keep an eye on","Следить за чем-то / внимательно наблюдать за чем-то","Can you keep an eye on my bag while I go to the toilet?","Можешь присмотреть за моей сумкой, пока я схожу в туалет?","General"],
+["To keep an eye on (idiom)","Присматривать за, следить за","Can you keep an eye on my bag while I go to the toilet?","Можешь присмотреть за моей сумкой, пока я схожу в туалет?","General"],
 ["How far is it true?","Насколько это правда?","You say you're fine, but how far is it true?","Ты говоришь, что всё хорошо, но насколько это правда?","General"],
 ["To juggle","Жонглировать / совмещать","It's hard to juggle work and family responsibilities.","Трудно совмещать работу и семейные обязанности.","General"],
 ["To pick up on","Усваивать / улавливать","Children pick up on languages much faster than adults.","Дети усваивают языки гораздо быстрее взрослых.","General"],
@@ -447,7 +447,7 @@ const CARDS_EN = [
 ["Gearbox","Коробка передач","This car has a six-speed gearbox with smooth shifts.","У этой машины шестиступенчатая коробка передач с плавным переключением.","Car"],
 ["Tail lights","Задние огни, габариты","One of your tail lights is broken — you should fix it.","Один из твоих задних огней разбит — нужно починить.","Car"],
 ["To slow down","Притормаживать","Slow down when you see a school zone sign.","Притормози, когда увидишь знак школьной зоны.","Car"],
-["To turn out to be","Оказаться...","The noise turned out to be a loose exhaust pipe.","Шум оказался ослабленной выхлопной трубой.","Car"],
+["To turn out to be (idiom)","Оказаться (в итоге), выясниться что","The noise turned out to be a loose exhaust pipe.","Шум оказался ослабленной выхлопной трубой.","Car"],
 ["A flooded section of road","Затопленный участок дороги","A flooded section of the road forced us to take a detour.","Затопленный участок дороги заставил нас ехать в объезд.","Car"],
 ["Brake pedal","Педаль тормоза","Press the brake pedal gently when approaching a red light.","Плавно нажми педаль тормоза при приближении к красному свету.","Car"],
 ["Clutch pedal","Педаль сцепления","Press the clutch pedal before shifting gears.","Нажми педаль сцепления перед переключением передач.","Car"],
