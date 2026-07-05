@@ -1209,16 +1209,19 @@ function shuffle(arr) {
 }
 function buildDeck() {
   const cc = cards();
-  const nw=cc.filter(c=>getStatus(c.id)==='new');
+  const DECK_SIZE = 20;
+  const nw=shuffle(cc.filter(c=>getStatus(c.id)==='new'));
   const dueLr=cc.filter(c=>getStatus(c.id)==='learning' && isDue(c.id));
   const dueKn=cc.filter(c=>getStatus(c.id)==='known' && isDue(c.id));
-  let pool=[];
-  pool.push(...shuffle(dueLr));
-  pool.push(...shuffle(dueKn));
-  const newSlots = Math.max(0, 15 - pool.length);
-  if(newSlots > 0) pool.push(...shuffle(nw).slice(0, newSlots));
-  if(!pool.length) pool=shuffle([...cc]).slice(0,15);
-  deck=shuffle(pool).slice(0,20);
+  const due=[...shuffle(dueLr), ...shuffle(dueKn)];
+  // Aim for 50% new cards each session; backfill from the other pool if one runs short.
+  const half = Math.floor(DECK_SIZE/2);
+  let newCount = Math.min(half, nw.length);
+  let dueCount = Math.min(DECK_SIZE - newCount, due.length);
+  newCount = Math.min(nw.length, DECK_SIZE - dueCount);
+  let pool=[...nw.slice(0, newCount), ...due.slice(0, dueCount)];
+  if(!pool.length) pool=shuffle([...cc]).slice(0, DECK_SIZE);
+  deck=shuffle(pool).slice(0, DECK_SIZE);
   deckIdx=0; flipped=false;
   sessionStats={total:0,good:0,hard:0,again:0,skipped:0};
 }
